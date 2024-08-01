@@ -1,0 +1,69 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      - POSTGRES_DB=${DB_NAME:-movies_database}
+      - POSTGRES_USER=${DB_USER:-app}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-123qwe}
+      - POSTGRES_HOST=${DB_HOST:-db}
+      - POSTGRES_PORT=${DB_PORT:-5432}
+    expose:
+      - "5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./schema_design/dump_db.sql:/docker-entrypoint-initdb.d/dump_db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.6.2
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    # ports:
+    #   - 127.0.0.1:9200:9200
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://127.0.0.1:9200/_cluster/health | grep -q \"green\""]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  redis:
+    image: redis:latest
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      db:
+        condition: service_healthy
+
+  etl_service:
+    build: ./etl/postgres_to_es
+    restart: always
+    env_file:
+      - ./etl/postgres_to_es/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      elastic:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+
+volumes:
+  postgres_data:
+  elastic_data:
