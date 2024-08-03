@@ -36,7 +36,7 @@ def load_movies_to_elasticsearch(movies: List[dict]):
 
 def load_genres_to_elasticsearch(genres):
     for genre in genres:
-        es_client = Elasticsearch(settings.es_host)
+        es_client = Elasticsearch(settings.elasticsearch_dsn)
         for genre in genres:
             try:
                 es_client.index(index="genres", id=genre["id"], document=genre)
@@ -46,7 +46,7 @@ def load_genres_to_elasticsearch(genres):
 
 
 def load_persons_to_elasticsearch(persons):
-    es_client = Elasticsearch(settings.es_host)
+    es_client = Elasticsearch(settings.elasticsearch_dsn)
     for person in persons:
         try:
             es_client.index(index="persons", id=person["id"], document=person)
