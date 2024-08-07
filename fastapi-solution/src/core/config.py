@@ -19,3 +19,5 @@ ELASTIC_PORT = int(os.getenv("ELASTIC_PORT", 9200))
 ELASTIC_SCHEMA = "http://"
 # Корень проекта
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+CACHE_TIME_LIFE = 60 * 60
