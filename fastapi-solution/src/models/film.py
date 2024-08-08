@@ -1,4 +1,3 @@
-"""Модуль, где определена модель кинопроизведения."""
 from typing import Optional, List
 
 from pydantic import BaseModel

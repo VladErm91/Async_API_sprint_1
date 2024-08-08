@@ -1,9 +1,8 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 from http import HTTPStatus
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+
 from models.film import Film, FilmDetailed
 from services.film import (FilmService, MultipleFilmsService, get_film_service,
                            get_multiple_films_service)
@@ -107,13 +106,5 @@ async def film_details(
 ) -> FilmDetailed:
     film = await film_service.get_by_uuid(film_uuid)
     if not film:
-        # Если фильм не найден, отдаём 404 статус
-        # Желательно пользоваться уже определёнными HTTP-статусами, которые содержат enum
-        # Такой код будет более поддерживаемым
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film not found')
-
-    # Перекладываем данные из models.Film в Film
-    # У модели бизнес-логики есть поле description, которое отсутствует в модели ответа API.
-    # Если бы использовалась общая модель для бизнес-логики и формирования ответов API
-    # вы бы предоставляли клиентам секретные данные и/или данные, которые им не нужны
     return film

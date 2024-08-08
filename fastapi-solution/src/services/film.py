@@ -1,18 +1,17 @@
-"""Сервисы для извлечения информации по фильмам из elastic."""
-import asyncio
+from http import HTTPStatus
 import logging
 from functools import lru_cache
 from pprint import pformat
 from typing import Optional
 
+from db.elastic import get_elastic
+from db.redis import generate_cache_key, get_redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from pydantic import TypeAdapter
 from redis.asyncio import Redis
 
 from core import config
-from db.elastic import get_elastic
-from db.redis import generate_cache_key, get_redis
 from models.film import Film, FilmDetailed, FilmGenre
 
 FILM_ADAPTER = TypeAdapter(list[Film])
@@ -21,13 +20,8 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-# FilmService содержит бизнес-логику по работе с фильмами.
-# Никакой магии тут нет. Обычный класс с обычными методами.
-# Этот класс ничего не знает про DI — максимально сильный и независимый.
-class FilmService:  # создатели линтера wemake python styleguide - объясняют необходимость
-    # наследоваться от object тем, что если мы его не указываем, оно всё равно происходит неявно.
-    # А как мы знаем, "явное лучше неявного". WPS306 Found class without a base class
-    """Сервис для получения детальной информации по фильму из es."""
+class FilmService:
+    """Сервис для получения детальной информации по фильму из ES."""
 
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         """Инициализация сервиса.
@@ -40,7 +34,7 @@ class FilmService:  # создатели линтера wemake python styleguide
         self.elastic = elastic
 
     # 1.1. получение фильма по id
-    # get_by_id возвращает объект фильма. Он опционален, так как фильм может отсутствовать в базе
+    # get_by_uuid возвращает объект фильма. Он опционален, так как фильм может отсутствовать в базе
     async def get_by_uuid(self, film_uuid: str) -> Optional[FilmDetailed]:
         """Получить детальную информацию о фильме по его id.
 
@@ -50,7 +44,7 @@ class FilmService:  # создатели линтера wemake python styleguide
         Returns:
             детальная информация о фильме
         """
-        # Пытаемся получить данные из кеша, потому что оно работает быстрее
+        # Получаем данные из кеша
         film = await self._get_film_from_cache(film_uuid)
         if not film:
             # Если фильма нет в кеше, то ищем его в Elasticsearch
@@ -63,7 +57,7 @@ class FilmService:  # создатели линтера wemake python styleguide
 
         return film
 
-    # 2.1. получение фильма из эластика по id
+    # 2.1. получение фильма из ES по id
     async def _get_film_from_elastic(self, film_id: str) -> Optional[FilmDetailed]:
         try:
             doc = await self.elastic.get(index='movies', id=film_id)
@@ -87,10 +81,6 @@ class FilmService:  # создатели линтера wemake python styleguide
 
     # 3.1. получение фильма из кэша по id
     async def _get_film_from_cache(self, film_uuid: str) -> Optional[FilmDetailed]:
-        # Пытаемся получить данные о фильме из кеша, используя команду get
-        # https://redis.io/commands/get/
-
-        # подготовка к генерации ключа
         params_to_key = {
             'uuid': film_uuid,
         }
@@ -139,6 +129,12 @@ class MultipleFilmsService:
         self.redis = redis
         self.elastic = elastic
 
+    async def get_by_uuid(self, uuid: str):
+        response = await self.elastic.get(index='movies', id=uuid)
+        if not response['found']:
+            return None
+        return response['_source']
+
     # 1.2. получение страницы списка фильмов отсортированных по популярности
     async def get_multiple_films(
         self,
@@ -174,7 +170,7 @@ class MultipleFilmsService:
         # запрашиваем инфо в кэше по ключу
         films_page = await self._get_multiple_films_from_cache(cache_key)
         if not films_page:
-            # если в кэше нет значения по этому ключу, делаем запрос в es
+            # если в кэше нет значения по этому ключу, делаем запрос в ES
             films_page = await self._get_multiple_films_from_elastic(
                 desc_order=desc_order,
                 page_size=page_size,
@@ -234,90 +230,142 @@ class MultipleFilmsService:
         return films_page
 
     # 2.2. получение из es страницы списка фильмов отсортированных по популярности
+    # async def _get_multiple_films_from_elastic(
+    #     self,
+    #     desc_order: bool,
+    #     page_size: int,
+    #     page_number: int,
+    #     genre: Optional[str] = None,
+    #     similar: Optional[str] = None,
+    # ):
+    #     if desc_order:
+    #         order_name = 'desc'
+    #         order_mode = 'max'
+    #     else:
+    #         order_name = 'asc'
+    #         order_mode = 'min'
+
+    #     search_body = {
+    #         'size': page_size,
+    #         'from': (page_number - 1) * page_size,
+    #         'sort': [
+    #             {'imdb_rating': {'order': order_name, 'mode': order_mode}},
+    #         ],
+    #     }
+
+    #     # Фильтр по жанру
+    #     if genre is not None:
+    #         search_body['query'] = {
+    #             'bool': {
+    #                 'filter': [
+    #                     {'term': {'genre.uuid': genre}},
+    #                 ],
+    #             },
+    #         }
+    #         logger.debug("genre is not None", genre, search_body)
+
+    #     # Фильтр по жанрам похожего фильма
+    #     if similar is not None:
+    #         similar_search_body = {
+    #             'query': {
+    #                 'bool': {
+    #                     'filter': [
+    #                         {'term': {'id': genre}},
+    #                     ],
+    #                 },
+    #             },
+    #         }
+    #         similar_response = await self.elastic.search(index='movies', body=similar_search_body)
+    #         similar_films = []
+    #         for similar_hit in similar_response['hits']['hits']:
+    #             similar_films.append(FilmDetailed(**similar_hit['_source']))
+    #         genre_names = [similar_film.genre for similar_film in similar_films]
+
+    #         if genre_names:
+    #             genre_names = genre_names[0]
+    #         logger.debug('genres: %s' % (', '.join(genre_names)))
+    #         search_body['query'] = {
+    #             'bool': {
+    #                 'filter': [
+    #                     {'terms': {'genre': genre_names}},
+    #                 ],
+    #             },
+    #         }
+
+    #     response = await self.elastic.search(index='movies', body=search_body)
+
+    #     multiple_films = []
+    #     for film_hit in response['hits']['hits']:
+    #         multiple_films.append(Film(**film_hit['_source']))
+
+    #     return multiple_films
     async def _get_multiple_films_from_elastic(
         self,
-        desc_order: bool,
-        page_size: int,
-        page_number: int,
-        genre: Optional[str] = None,
         similar: Optional[str] = None,
+        genre: Optional[str] = None,
+        desc_order: bool = True,
+        page_size: int = 50,
+        page_number: int = 1,
     ):
-        if desc_order:
-            order_name = 'desc'
-            order_mode = 'max'
-        else:
-            order_name = 'asc'
-            order_mode = 'min'
-
-        search_body = {
-            'size': page_size,
-            'from': (page_number - 1) * page_size,
-            'sort': [
-                {'imdb_rating': {'order': order_name, 'mode': order_mode}},
-            ],
+        query = {
+            "size": page_size,
+            "from": (page_number - 1) * page_size,
+            "sort": [{"imdb_rating": {"order": "desc" if desc_order else "asc"}}],
+            "query": {
+                "bool": {
+                    "must": [],
+                    "filter": []
+                }
+            }
         }
 
-        # TODO: D.R.Y. код вспомогательных запросов (по жанру и по жанрам похожего фильма):
-        # находим название указанного жанра:
-        if genre is not None:
-            genre_search_body = {
-                'query': {
-                    'bool': {
-                        'filter': [
-                            {'term': {'uuid': genre}},
-                        ],
-                    },
-                },
-            }
-            # TODO: body - устаревший параметр, заменить отдельными параметрами
-            genre_response = await self.elastic.search(index='genres', body=genre_search_body)
-            genres = []
-            for hit in genre_response['hits']['hits']:
-                genres.append(FilmGenre(**hit['_source']))
-            genre_names = [genre.name for genre in genres]
-            logger.debug('genres: %s' % (', '.join(genre_names)))
-            search_body['query'] = {
-                'bool': {
-                    'filter': [
-                        {'terms': {'genre': genre_names}},
-                    ],
-                },
-            }
+        if similar:
+            logging.info("similar: %s", similar)
 
-        # находим названия жанров, фильма указанного как похожий
-        if similar is not None:
-            similar_search_body = {
-                'query': {
-                    'bool': {
-                        'filter': [
-                            {'term': {'id': genre}},
-                        ],
-                    },
-                },
-            }
-            similar_response = await self.elastic.search(index='movies', body=similar_search_body)
-            similar_films = []
-            for similar_hit in similar_response['hits']['hits']:
-                similar_films.append(FilmDetailed(**similar_hit['_source']))
-            genre_names = [similar_film.genre for similar_film in similar_films]
-            if genre_names:
-                genre_names = genre_names[0]
-            logger.debug('genres: %s' % (', '.join(genre_names)))
-            search_body['query'] = {
-                'bool': {
-                    'filter': [
-                        {'terms': {'genre': genre_names}},
-                    ],
-                },
-            }
+            similar_film = await self.get_by_uuid(similar)
+            logging.info("similar film retrieved: %s", similar_film)
+            if similar_film and similar_film.get('genre'):
+                first_genre_uuid = similar_film['genre'][0]['uuid']
+                logging.info("first_genre_uuid: %s", first_genre_uuid)
+                query["query"]["bool"]["filter"].append({
+                    "nested": {
+                        "path": "genre",
+                        "query": {
+                            "term": {
+                                "genre.uuid": first_genre_uuid
+                            }
+                        }
+                    }
+                })
+                logging.info("query: %s", query)
+            else:
+                logging.warning("No genre found for film with id: %s", similar)
 
-        response = await self.elastic.search(index='movies', body=search_body)
+        if genre:
+            query["query"]["bool"]["filter"].append({
+                "nested": {
+                    "path": "genre",
+                    "query": {
+                        "term": {
+                            "genre.uuid": genre
+                        }
+                    }
+                }
+            })
+            logging.info("genre: %s", genre)
+        logging.info(f"Query to Elasticsearch: {pformat(query)}")
+        try:
+            similar_response = await self.elastic.search(index='movies', body=query)
+            logging.debug(f"Response from Elasticsearch: {pformat(similar_response)}")
+        except Exception as e:
+            logging.error(f"Error while querying Elasticsearch: {str(e)}")
+            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
 
-        multiple_films = []
-        for film_hit in response['hits']['hits']:
-            multiple_films.append(Film(**film_hit['_source']))
+        if not similar_response["hits"]["hits"]:
+            return []
 
-        return multiple_films
+        films_page = [Film(**hit['_source']) for hit in similar_response["hits"]["hits"]]
+        return films_page
 
     # 2.3 Полнотекстовый поиск по фильмам:
     async def _fulltext_search_films_in_elastic(
@@ -334,7 +382,7 @@ class MultipleFilmsService:
                 'size': page_size,
             },
         )
-        logger.debug(search_results)
+        logging.debug(search_results)
         return [Film(**hit['_source']) for hit in search_results['hits']['hits']]
 
     # 3.2. получение страницы списка фильмов отсортированных по популярности из кэша
