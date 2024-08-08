@@ -110,13 +110,13 @@ def extract_persons(last_modified_persons: datetime) -> List[Dict]:
         return []
 
 
-def get_genres(movie_id: str) -> List[str]:
+def get_genres(movie_id: str) -> List[Dict[str, str]]:
     """Retrieve genres for a given movie."""
     if not movie_id:
         logger.error("Invalid movie ID: None")
         return []
     query = (
-        select((genre.c.name))
+        select(genre.c.name, genre.c.id)
         .select_from(
             genre.join(genre_film_work, genre.c.id == genre_film_work.c.genre_id)
         )
@@ -124,7 +124,7 @@ def get_genres(movie_id: str) -> List[str]:
     )
     try:
         result = session.execute(query)
-        return [row[0] for row in result]
+        return [{"name": row[0], "uuid": str(row[1])} for row in result]
     except DataError as e:
         logger.error(f"DataError for movie ID {movie_id}: {e}")
         return []
