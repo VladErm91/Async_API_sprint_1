@@ -3,8 +3,8 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from models.person import Person
-from services.person import PersonService, get_person_service
+from src.models.person import Person
+from src.services.person import PersonService, get_person_service
 
 router = APIRouter()
 

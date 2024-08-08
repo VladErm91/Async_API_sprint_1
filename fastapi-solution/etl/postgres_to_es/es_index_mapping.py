@@ -77,3 +77,4 @@ index_body = {
 }
 
 es.options(ignore_status=[400]).indices.create(index="movies", body=index_body)
+

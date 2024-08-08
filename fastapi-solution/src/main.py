@@ -3,9 +3,9 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
 
-from api.v1 import films, genres, persons
-from core import config
-from db import elastic, redis
+from src.api.v1 import films, genres, persons
+from src.core import config
+from src.db import elastic, redis
 
 app = FastAPI(
     title=config.PROJECT_NAME,

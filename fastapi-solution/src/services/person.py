@@ -6,9 +6,9 @@ from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
 from redis.asyncio import Redis
 
-from db.elastic import get_elastic
-from db.redis import get_redis
-from models.person import Person
+from src.db.elastic import get_elastic
+from src.db.redis import get_redis
+from src.models.person import Person
 
 
 class PersonService:
