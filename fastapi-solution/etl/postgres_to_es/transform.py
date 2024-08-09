@@ -31,9 +31,9 @@ def transform_movie(movie_row: Dict) -> Dict:
         directors = actors = writers = []
 
     movie = Movie(
-        id=movie_id,
+        uuid=movie_id,
         imdb_rating=imdb_rating if imdb_rating is not None else None,
-        genres=genres,
+        genre=genres,
         title=movie_row["title"],
         description=description,
         directors_names=directors_names,

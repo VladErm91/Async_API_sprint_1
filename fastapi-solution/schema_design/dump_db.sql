@@ -49,17 +49,17 @@ CREATE INDEX person_full_name_idx ON person(full_name);
 CREATE UNIQUE INDEX film_work_genre_idx ON genre_film_work (film_work_id, genre_id);
 CREATE UNIQUE INDEX film_work_person_role_idx ON person_film_work (film_work_id, person_id, role);
 
-CREATE OR REPLACE FUNCTION notify_genre_changes()
-RETURNS trigger AS $$
-BEGIN
-  PERFORM pg_notify('genre_changes', row_to_json(NEW)::text);
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- CREATE OR REPLACE FUNCTION notify_genre_changes()
+-- RETURNS trigger AS $$
+-- BEGIN
+--   PERFORM pg_notify('genre_changes', row_to_json(NEW)::text);
+--   RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER genre_changes_trigger
-AFTER INSERT OR UPDATE OR DELETE ON genre
-FOR EACH ROW EXECUTE FUNCTION notify_genre_changes();
+-- CREATE TRIGGER genre_changes_trigger
+-- AFTER INSERT OR UPDATE OR DELETE ON genre
+-- FOR EACH ROW EXECUTE FUNCTION notify_genre_changes();
 
 
 COPY content.film_work (id, title, description, creation_date, rating, type, created, modified) FROM stdin;

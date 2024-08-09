@@ -36,9 +36,16 @@ index_body = {
     "mappings": {
         "dynamic": "strict",
         "properties": {
-            "id": {"type": "keyword"},
+            "uuid": {"type": "keyword"},
             "imdb_rating": {"type": "float"},
-            "genres": {"type": "keyword"},
+            "genre": {
+                "type": "nested",
+                "dynamic": "strict",
+                "properties": {
+                    "uuid": {"type": "keyword"},
+                    "name": {"type": "keyword"},
+                },
+            },
             "title": {
                 "type": "text",
                 "analyzer": "ru_en",
@@ -52,24 +59,24 @@ index_body = {
                 "type": "nested",
                 "dynamic": "strict",
                 "properties": {
-                    "id": {"type": "keyword"},
-                    "name": {"type": "text", "analyzer": "ru_en"},
+                    "uuid": {"type": "keyword"},
+                    "full_name": {"type": "text", "analyzer": "ru_en"},
                 },
             },
             "actors": {
                 "type": "nested",
                 "dynamic": "strict",
                 "properties": {
-                    "id": {"type": "keyword"},
-                    "name": {"type": "text", "analyzer": "ru_en"},
+                    "uuid": {"type": "keyword"},
+                    "full_name": {"type": "text", "analyzer": "ru_en"},
                 },
             },
             "writers": {
                 "type": "nested",
                 "dynamic": "strict",
                 "properties": {
-                    "id": {"type": "keyword"},
-                    "name": {"type": "text", "analyzer": "ru_en"},
+                    "uuid": {"type": "keyword"},
+                    "full_name": {"type": "text", "analyzer": "ru_en"},
                 },
             },
         },
@@ -77,4 +84,3 @@ index_body = {
 }
 
 es.options(ignore_status=[400]).indices.create(index="movies", body=index_body)
-

@@ -59,7 +59,7 @@ def etl_process():
         movies = [transform_movie(movie_row) for movie_row in movie_rows]
 
         if movie_rows:
-            last_processed_id = movies[-1]["id"]
+            last_processed_id = movies[-1]["uuid"]
             set_last_processed_id(last_processed_id)
             # Update last modified timestamps
             latest_timestamp_movies = max(

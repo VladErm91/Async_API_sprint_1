@@ -3,10 +3,15 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel
 
 
+class Genre(BaseModel):
+    uuid: str
+    name: str
+
+
 class Movie(BaseModel):
-    id: str
+    uuid: str
     imdb_rating: Optional[float]
-    genres: List[str]
+    genre: List[Genre]
     title: str
     description: str
     directors_names: List[str]
@@ -15,8 +20,3 @@ class Movie(BaseModel):
     directors: List[Dict]
     actors: List[Dict]
     writers: List[Dict]
-
-
-class Genre(BaseModel):
-    id: str
-    name: str
