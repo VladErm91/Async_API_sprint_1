@@ -3,7 +3,7 @@ from typing import List
 
 
 class Genre(BaseModel):
-    id: str
+    uuid: str
     name: str
 
 

@@ -83,4 +83,24 @@ index_body = {
     },
 }
 
+index_body_genres = {
+    "settings": {
+        "refresh_interval": "1s",
+    },
+    "mappings": {
+        "dynamic": "strict",
+        "properties": {
+            "uuid": {"type": "keyword"},
+            "name": {
+                "type": "text",
+                "analyzer": "standard",
+                "fields": {
+                    "raw": {"type": "keyword"}
+                },
+            },
+        },
+    },
+}
+
 es.options(ignore_status=[400]).indices.create(index="movies", body=index_body)
+es.options(ignore_status=[400]).indices.create(index="genres", body=index_body_genres)

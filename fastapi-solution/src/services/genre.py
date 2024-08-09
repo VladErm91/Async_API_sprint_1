@@ -17,7 +17,7 @@ class GenreService:
         self.redis = redis
         self.elastic = elastic
 
-    async def get_by_id(self, genre_id: str) -> Optional[Genre]:
+    async def get_by_uuid(self, genre_id: str) -> Optional[Genre]:
         cache_key = f"genre:{genre_id}"
 
         cached_genre = await self.redis.get(cache_key)
