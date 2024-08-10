@@ -37,8 +37,10 @@ services:
       memlock:
         soft: -1
         hard: -1
+    volumes:
+      - elasticsearch_data:/opt/elasticsearch/data   
     healthcheck:
-      test: ["CMD-SHELL", "curl -s http://127.0.0.1:9200/_cluster/health | grep -q \"green\""]
+      test: ["CMD-SHELL", "curl -s http://elastic:9200/_cluster/health | grep -q '\\(green\\|yellow\\)'" ]
     depends_on:
       db:
         condition: service_healthy
