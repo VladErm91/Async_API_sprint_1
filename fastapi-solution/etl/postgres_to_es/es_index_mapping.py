@@ -7,6 +7,8 @@ es = Elasticsearch(settings.elasticsearch_dsn)
 index_body = {
     "settings": {
         "refresh_interval": "1s",
+        "number_of_shards": "1",
+        "number_of_replicas": "0",
         "analysis": {
             "filter": {
                 "english_stop": {"type": "stop", "stopwords": "_english_"},
@@ -83,4 +85,28 @@ index_body = {
     },
 }
 
+index_body_genres = {
+    "settings": {
+        "refresh_interval": "1s",
+    },
+    "mappings": {
+        "dynamic": "strict",
+        "properties": {
+            "uuid": {
+                "type": "keyword", 
+                "dynamic": "strict",
+            },
+            "name": {
+                "type": "text",
+                "dynamic": "strict",
+                "analyzer": "standard",
+                "fields": {
+                    "raw": {"type": "keyword"}
+                },
+            },
+        },
+    },
+}
+
 es.options(ignore_status=[400]).indices.create(index="movies", body=index_body)
+es.options(ignore_status=[400]).indices.create(index="genres", body=index_body_genres)

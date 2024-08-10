@@ -12,8 +12,8 @@ from redis.asyncio import Redis
 from src.core import config
 from src.db.elastic import get_elastic
 from src.db.redis import generate_cache_key, get_redis
-from src.models.film import Film, FilmDetailed, FilmGenre
-
+from src.models.film import Film, FilmDetailed
+from src.models.genre import Genre
 FILM_ADAPTER = TypeAdapter(list[Film])
 
 logger = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ class FilmService:
         source = doc["_source"]
         logger.debug(pformat(doc["_source"]))
         genres = source.get("genre", [])
-        genre_objs = [FilmGenre(**genre) for genre in genres]
+        genre_objs = [Genre(**genre) for genre in genres]
         film_data = {
             "uuid": source.get("uuid"),
             "title": source.get("title"),

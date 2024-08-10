@@ -48,7 +48,7 @@ def transform_movie(movie_row: Dict) -> Dict:
 
 def transform_genre(genre_row):
     return {
-        "id": str(genre_row["id"]),
+        "uuid": str(genre_row["id"]),
         "name": genre_row["name"],
         "modified": genre_row["modified"],
     }

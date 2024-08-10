@@ -61,14 +61,13 @@ def load_movies_to_elasticsearch(movies: List[dict]):
 
 
 def load_genres_to_elasticsearch(genres):
-    for genre in genres:
         es_client = Elasticsearch(settings.elasticsearch_dsn)
         for genre in genres:
             try:
-                es_client.index(index="genres", id=genre["id"], document=genre)
-                logger.info(f"Genre {genre['id']} indexed successfully")
+                es_client.index(index="genres", id=genre["uuid"], document=genre)
+                logger.info(f"Genre {genre['uuid']} indexed successfully")
             except Exception as e:
-                logger.error(f"Failed to index genre {genre['id']}: {e}")
+                logger.error(f"Failed to index genre {genre['uuid']}: {e}")
 
 
 def load_persons_to_elasticsearch(persons):

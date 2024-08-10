@@ -1,20 +1,13 @@
 from typing import List, Optional
 
 from pydantic import BaseModel
-
+from src.models.genre import Genre
 
 class Person(BaseModel):
     """Модель данных персоны, участвующей в создании фильма."""
 
     uuid: str
     full_name: str
-
-
-class FilmGenre(BaseModel):
-    """Модель данных жанра, к которому относится фильм."""
-
-    uuid: str
-    name: str
 
 
 class Film(BaseModel):
@@ -28,7 +21,7 @@ class Film(BaseModel):
 class FilmDetailed(Film):
     """Схема данных подробностей о кинопроизведении."""
 
-    genre: Optional[List[FilmGenre]]
+    genre: Optional[List[Genre]]
     description: Optional[str] = None
     directors_names: Optional[List[str]] = None
     actors_names: Optional[List[str]] = None
