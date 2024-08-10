@@ -1,7 +1,9 @@
 from typing import List, Optional
 
 from pydantic import BaseModel
+
 from src.models.genre import Genre
+
 
 class Person(BaseModel):
     """Модель данных персоны, участвующей в создании фильма."""

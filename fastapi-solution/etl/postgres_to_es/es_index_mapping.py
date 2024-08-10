@@ -93,16 +93,14 @@ index_body_genres = {
         "dynamic": "strict",
         "properties": {
             "uuid": {
-                "type": "keyword", 
+                "type": "keyword",
                 "dynamic": "strict",
             },
             "name": {
                 "type": "text",
                 "dynamic": "strict",
                 "analyzer": "standard",
-                "fields": {
-                    "raw": {"type": "keyword"}
-                },
+                "fields": {"raw": {"type": "keyword"}},
             },
         },
     },

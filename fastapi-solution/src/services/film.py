@@ -14,6 +14,7 @@ from src.db.elastic import get_elastic
 from src.db.redis import generate_cache_key, get_redis
 from src.models.film import Film, FilmDetailed
 from src.models.genre import Genre
+
 FILM_ADAPTER = TypeAdapter(list[Film])
 
 logger = logging.getLogger(__name__)

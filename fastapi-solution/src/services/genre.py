@@ -13,6 +13,7 @@ from src.models.genre import Genre
 
 class GenreService:
     """Сервис для получения информации о жанре/жанрах из ES."""
+
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.redis = redis
         self.elastic = elastic
@@ -32,8 +33,14 @@ class GenreService:
         await self.redis.set(cache_key, genre.json(), ex=300)  # Кеш на 5 минут
         return genre
 
-    async def search(self, query: Optional[str] = None, sort: Optional[str] = None, order: str = "asc", page: int = 1,
-                     page_size: int = 10) -> (List[Genre], int):
+    async def search(
+        self,
+        query: Optional[str] = None,
+        sort: Optional[str] = None,
+        order: str = "asc",
+        page: int = 1,
+        page_size: int = 10,
+    ) -> (List[Genre], int):
         cache_key = f"genres:search:{query}:{sort}:{order}:{page}:{page_size}"
         cached_genres = await self.redis.get(cache_key)
         if cached_genres:
@@ -46,7 +53,7 @@ class GenreService:
                 "bool": {
                     "should": [
                         {"prefix": {"name": query.lower()}},
-                        {"wildcard": {"name": f"{query.lower()}*"}}
+                        {"wildcard": {"name": f"{query.lower()}*"}},
                     ]
                 }
             }
@@ -54,7 +61,9 @@ class GenreService:
             body["query"] = {"match_all": {}}
 
         if sort:
-            body["sort"] = [{sort: {"order": order}}]  # Используем переменные sort и order корректно
+            body["sort"] = [
+                {sort: {"order": order}}
+            ]  # Используем переменные sort и order корректно
 
         body["from"] = (page - 1) * page_size
         body["size"] = page_size
@@ -67,7 +76,9 @@ class GenreService:
             raise HTTPException(status_code=404, detail="Page not found")
 
         await self.redis.set(
-            cache_key, json.dumps({"items": [genre.json() for genre in genres], "total": total}), ex=300
+            cache_key,
+            json.dumps({"items": [genre.json() for genre in genres], "total": total}),
+            ex=300,
         )  # Кеш на 5 минут
         return genres, total
 

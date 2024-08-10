@@ -1,11 +1,10 @@
 from http import HTTPStatus
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
-from src.models.genre import Genre
+from src.models.genre import Genre, GenrePaginationResponse
 from src.services.genre import GenreService, get_genre_service
-from src.models.genre import GenrePaginationResponse
 
 router = APIRouter()
 
@@ -18,9 +17,6 @@ async def genre_details(
     if not genre:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="genre not found")
     return genre
-
-
-from fastapi import HTTPException
 
 
 @router.get("", response_model=GenrePaginationResponse)
@@ -38,4 +34,6 @@ async def search_genres(
     if page > max_pages:
         raise HTTPException(status_code=404, detail="Page not found")
 
-    return GenrePaginationResponse(items=genres, total=total, page=page, page_size=page_size)
+    return GenrePaginationResponse(
+        items=genres, total=total, page=page, page_size=page_size
+    )

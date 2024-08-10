@@ -50,7 +50,6 @@ def transform_genre(genre_row):
     return {
         "uuid": str(genre_row["id"]),
         "name": genre_row["name"],
-        "modified": genre_row["modified"],
     }
 
 
