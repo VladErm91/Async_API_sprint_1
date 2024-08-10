@@ -50,8 +50,14 @@ services:
         hard: -1
     expose:
       - "9200"
+    volumes:
+      - elasticsearch_data:/opt/elasticsearch/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -s http://127.0.0.1:9200/_cluster/health | grep -q \"green\""]
+      test: ["CMD-SHELL", "curl -s http://elastic:9200/_cluster/health | grep -q '\\(green\\|yellow\\)'" ]
+      #test: ["CMD", "curl", "-f", "http://elastic:9200"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
     depends_on:
       db:
         condition: service_healthy
@@ -86,4 +92,4 @@ services:
 
 volumes:
   postgres_data:
-  elastic_data:
+  elasticsearch_data:
