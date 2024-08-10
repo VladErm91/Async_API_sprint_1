@@ -7,8 +7,6 @@ es = Elasticsearch(settings.elasticsearch_dsn)
 index_body = {
     "settings": {
         "refresh_interval": "1s",
-        "number_of_shards": "1",
-        "number_of_replicas": "0",
         "analysis": {
             "filter": {
                 "english_stop": {"type": "stop", "stopwords": "_english_"},
