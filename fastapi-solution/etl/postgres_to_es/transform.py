@@ -55,7 +55,7 @@ def transform_genre(genre_row):
 
 def transform_person(person_row):
     return {
-        "id": str(person_row["id"]),
+        "uuid": str(person_row["id"]),
         "full_name": person_row["full_name"],
         "modified": person_row["modified"],
     }

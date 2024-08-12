@@ -3,31 +3,18 @@ from datetime import datetime
 import backoff
 from apscheduler.schedulers.blocking import BlockingScheduler
 from config import settings
-from database import (
-    extract_genres,
-    extract_movies,
-    extract_persons,
-    get_movies_by_genre,
-    get_movies_by_person,
-)
-from es_load import (
-    load_genres_to_elasticsearch,
-    load_movies_to_elasticsearch,
-    load_persons_to_elasticsearch,
-)
+from database import (extract_genres, extract_movies, extract_persons,
+                      get_movies_by_genre, get_movies_by_person)
+from es_load import (load_genres_to_elasticsearch,
+                     load_movies_to_elasticsearch,
+                     load_persons_to_elasticsearch)
 from logger import logger
 from sqlalchemy.exc import OperationalError
 from transform import transform_genre, transform_movie, transform_person
-from utils import (
-    get_last_modified_genres,
-    get_last_modified_movies,
-    get_last_modified_persons,
-    get_last_processed_id,
-    set_last_modified_genres,
-    set_last_modified_movies,
-    set_last_modified_persons,
-    set_last_processed_id,
-)
+from utils import (get_last_modified_genres, get_last_modified_movies,
+                   get_last_modified_persons, get_last_processed_id,
+                   set_last_modified_genres, set_last_modified_movies,
+                   set_last_modified_persons, set_last_processed_id)
 
 
 @backoff.on_exception(

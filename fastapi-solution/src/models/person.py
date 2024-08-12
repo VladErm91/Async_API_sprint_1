@@ -2,5 +2,5 @@ from pydantic import BaseModel
 
 
 class Person(BaseModel):
-    id: str
+    uuid: str
     full_name: str

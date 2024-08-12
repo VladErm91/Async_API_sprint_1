@@ -104,5 +104,29 @@ index_body_genres = {
     },
 }
 
+index_body_persons = {
+    "settings": {
+        "refresh_interval": "1s",
+    },
+    "mappings": {
+        "dynamic": "strict",
+        "properties": {
+            "uuid": {
+                "type": "keyword",
+                "dynamic": "strict",
+            },
+            "full_name": {
+                "type": "text",
+                "dynamic": "strict",
+                "analyzer": "standard",
+                "fields": {"raw": {"type": "keyword"}},
+            },
+            "modified": {
+                "modified": {"type": "date"},
+            },
+        },
+    },
+}
 es.options(ignore_status=[400]).indices.create(index="movies", body=index_body)
 es.options(ignore_status=[400]).indices.create(index="genres", body=index_body_genres)
+es.options(ignore_status=[400]).indices.create(index="persons", body=index_body_persons)

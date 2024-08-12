@@ -16,7 +16,7 @@ class PersonService:
         self.redis = redis
         self.elastic = elastic
 
-    async def get_by_id(self, person_id: str) -> Optional[Person]:
+    async def get_by_uuid(self, person_id: str) -> Optional[Person]:
         cache_key = f"person:{person_id}"
         cached_person = await self.redis.get(cache_key)
         if cached_person:
