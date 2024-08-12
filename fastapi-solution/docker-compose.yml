@@ -80,8 +80,12 @@ services:
         condition: service_healthy
 
   etl_service:
+    command: /bin/sh -c "while sleep 1000; do :; done"
     build: ./etl/postgres_to_es
-    restart: always
+    # restart: always
+    container_name: etl_service
+    volumes:
+      - ./etl/postgres_to_es:/etl
     env_file:
       - ./etl/postgres_to_es/.env
     depends_on:

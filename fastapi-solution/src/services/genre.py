@@ -30,7 +30,9 @@ class GenreService:
         except NotFoundError:
             return None
         genre = Genre(**doc["_source"])
-        await self.redis.set(cache_key, genre.json(), ex=300)  # Кеш на 5 минут
+        await self.redis.set(
+            cache_key, genre.model_dump_json(), ex=300
+        )  # Кеш на 5 минут
         return genre
 
     async def search(
@@ -45,7 +47,9 @@ class GenreService:
         cached_genres = await self.redis.get(cache_key)
         if cached_genres:
             data = json.loads(cached_genres)
-            return [Genre.parse_raw(genre) for genre in data["items"]], data["total"]
+            return [Genre.model_validate_json(genre) for genre in data["items"]], data[
+                "total"
+            ]
 
         body = {}
         if query:

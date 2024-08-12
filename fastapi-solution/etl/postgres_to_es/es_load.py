@@ -74,7 +74,7 @@ def load_persons_to_elasticsearch(persons):
     es_client = Elasticsearch(settings.elasticsearch_dsn)
     for person in persons:
         try:
-            es_client.index(index="persons", id=person["id"], document=person)
-            logger.info(f"Person {person['id']} indexed successfully")
+            es_client.index(index="persons", id=person["uuid"], document=person)
+            logger.info(f"Person {person['uuid']} indexed successfully")
         except Exception as e:
-            logger.error(f"Failed to index person {person['id']}: {e}")
+            logger.error(f"Failed to index person {person['uuid']}: {e}")

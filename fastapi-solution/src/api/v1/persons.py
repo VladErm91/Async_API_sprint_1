@@ -29,8 +29,12 @@ class Person(BaseModel):
 async def person_details(
     person_id: str, person_service: PersonService = Depends(get_person_service)
 ) -> Person:
+<<<<<<< HEAD
 
     person = await person_service.get_by_id(person_id)
+=======
+    person = await person_service.get_by_uuid(person_id)
+>>>>>>> origin/develop
     if not person:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="person not found")
     return person

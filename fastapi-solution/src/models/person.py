@@ -16,7 +16,11 @@ class PortfolioFilm(BaseModel):
 
 
 class Person(BaseModel):
+<<<<<<< HEAD
     uuid: UUID
+=======
+    uuid: str
+>>>>>>> origin/develop
     full_name: str
     films: Optional[list[PortfolioFilm]]
 

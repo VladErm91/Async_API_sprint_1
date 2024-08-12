@@ -10,7 +10,7 @@ COPY requirements.txt requirements.txt
 RUN python -m pip install --upgrade pip \
      && pip install -r requirements.txt --no-cache-dir
 
-COPY . .
+#COPY . .
 
-CMD ["sh", "-c", "python ./es_index_mapping.py && python ./etl.py"]
+#CMD ["sh", "-c", "python ./es_index_mapping.py && python ./etl.py"]
 
