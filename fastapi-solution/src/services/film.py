@@ -9,11 +9,11 @@ from fastapi import Depends, HTTPException
 from pydantic import TypeAdapter
 from redis.asyncio import Redis
 
-from src.core import config
-from src.db.elastic import get_elastic
-from src.db.redis import generate_cache_key, get_redis
-from src.models.film import Film, FilmDetailed
-from src.models.genre import Genre
+from core import config
+from db.elastic import get_elastic
+from db.redis import generate_cache_key, get_redis
+from models.film import Film, FilmDetailed
+from models.genre import Genre
 
 FILM_ADAPTER = TypeAdapter(list[Film])
 

@@ -6,9 +6,9 @@ from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends, HTTPException
 from redis.asyncio import Redis
 
-from src.db.elastic import get_elastic
-from src.db.redis import get_redis
-from src.models.genre import Genre
+from db.elastic import get_elastic
+from db.redis import get_redis
+from models.genre import Genre
 
 
 class GenreService:
