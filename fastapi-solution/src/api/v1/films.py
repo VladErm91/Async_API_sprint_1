@@ -3,7 +3,6 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-<<<<<<< HEAD
 from models.film import Film, FilmDetailed
 from services.film import (
     FilmService,
@@ -11,11 +10,7 @@ from services.film import (
     get_film_service,
     get_multiple_films_service,
 )
-=======
-from src.models.film import Film, FilmDetailed
-from src.services.film import (FilmService, MultipleFilmsService,
-                               get_film_service, get_multiple_films_service)
->>>>>>> origin/develop
+
 
 # Объект router, в котором регистрируем обработчики
 router = APIRouter()

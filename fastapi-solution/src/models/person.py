@@ -1,13 +1,30 @@
-from pydantic import BaseModel
 from typing import Optional
 from uuid import UUID
 
+from pydantic import BaseModel
 
 
-class ListFilm(BaseModel):
+class IdModel(BaseModel):
     uuid: str
+
+
+class Film(IdModel):
     title: str
-    imdb_rating: float
+
+
+class FilmRating(Film):
+    imdb_rating: float | None = 0.0
+
+
+class PersonRoleInFilms(BaseModel):
+    role: str
+    films_details: list[FilmRating]
+
+
+class PersonWithFilms(IdModel):
+    full_name: str
+    roles: list[PersonRoleInFilms]
+
 
 
 class PortfolioFilm(BaseModel):
@@ -15,18 +32,8 @@ class PortfolioFilm(BaseModel):
     roles: list[str]
 
 
-class Person(BaseModel):
-<<<<<<< HEAD
-    uuid: UUID
-=======
-    uuid: str
->>>>>>> origin/develop
+class Person(IdModel):
     full_name: str
-    films: Optional[list[PortfolioFilm]]
 
-
-class PersonQuery(BaseModel):
-    query: str
-    page_number: int = 1
-    page_size: int = 30
-
+class PersonFilm(Person):
+    films: list[PortfolioFilm]
