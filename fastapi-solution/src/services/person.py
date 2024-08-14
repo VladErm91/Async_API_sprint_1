@@ -6,9 +6,9 @@ from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
 from redis.asyncio import Redis
 
-from src.db.elastic import get_elastic
-from src.db.redis import get_redis
-from src.models.person import Person
+from db.elastic import get_elastic
+from db.redis import get_redis
+from models.person import Person
 
 
 class PersonService:
@@ -20,21 +20,21 @@ class PersonService:
         cache_key = f"person:{person_id}"
         cached_person = await self.redis.get(cache_key)
         if cached_person:
-            return Person.parse_raw(cached_person)
+            return Person.model_validate_json(cached_person)
 
         try:
             doc = await self.elastic.get(index="persons", id=person_id)
         except NotFoundError:
             return None
         person = Person(**doc["_source"])
-        await self.redis.set(cache_key, person.json(), ex=300)  # Кеш на 5 минут
+        await self.redis.set(cache_key, person.model_dump_json(), ex=300)  # Кеш на 5 минут
         return person
 
     async def search(self, query: str, sort: Optional[str] = None) -> List[Person]:
         cache_key = f"persons:search:{query}:{sort}"
         cached_persons = await self.redis.get(cache_key)
         if cached_persons:
-            return [Person.parse_raw(person) for person in json.loads(cached_persons)]
+            return [Person.model_validate_json(person) for person in json.loads(cached_persons)]
 
         body = {"query": {"multi_match": {"query": query, "fields": ["name"]}}}
         if sort:
@@ -43,7 +43,7 @@ class PersonService:
         result = await self.elastic.search(index="persons", body=body)
         persons = [Person(**hit["_source"]) for hit in result["hits"]["hits"]]
         await self.redis.set(
-            cache_key, json.dumps([person.json() for person in persons]), ex=300
+            cache_key, json.dumps([person.model_dump_json() for person in persons]), ex=300
         )  # Кеш на 5 минут
         return persons
 
