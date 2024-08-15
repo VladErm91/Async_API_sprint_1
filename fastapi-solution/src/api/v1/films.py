@@ -4,8 +4,8 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from models.film import Film, FilmDetailed
-from services.film import (FilmService, MultipleFilmsService,
-                               get_film_service, get_multiple_films_service)
+from services.film import (FilmService, MultipleFilmsService, get_film_service,
+                           get_multiple_films_service)
 
 # Объект router, в котором регистрируем обработчики
 router = APIRouter()
@@ -110,5 +110,5 @@ async def film_details(
 ) -> FilmDetailed:
     film = await film_service.get_by_uuid(film_uuid)
     if not film:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="film not found")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Film not found")
     return film
