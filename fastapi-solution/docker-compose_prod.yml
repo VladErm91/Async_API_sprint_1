@@ -1,7 +1,7 @@
 services:
   app:
     build: .
-    command: uvicorn src.main:app --host 0.0.0.0 --port 8000
+    command: uvicorn --app-dir ./src main:app --host 0.0.0.0 --port 8000
     env_file:
       - .env
     depends_on:
@@ -21,7 +21,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./schema_design/dump_db.sql:/docker-entrypoint-initdb.d/dump_db.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app"]
+      test: ["CMD-SHELL", "pg_isready -U app -d movies_database"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -32,15 +32,19 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
+      - ingest.geoip.downloader.enabled=false
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - elasticsearch_data:/opt/elasticsearch/data   
+      - elasticsearch_data:/opt/elasticsearch/data
     healthcheck:
       test: ["CMD-SHELL", "curl -s http://elastic:9200/_cluster/health | grep -q '\\(green\\|yellow\\)'" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
     depends_on:
       db:
         condition: service_healthy
@@ -73,4 +77,4 @@ services:
 
 volumes:
   postgres_data:
-  elastic_data:
+  elasticsearch_data:
