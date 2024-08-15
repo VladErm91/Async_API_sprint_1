@@ -9,7 +9,7 @@ from fastapi import Depends, HTTPException
 from pydantic import TypeAdapter
 from redis.asyncio import Redis
 
-from core import config
+from core.config import settings
 from db.elastic import get_elastic
 from db.redis import generate_cache_key, get_redis
 from models.film import Film, FilmDetailed
@@ -113,7 +113,7 @@ class FilmService:
         await self.redis.set(
             cache_key,
             film.model_dump_json(),
-            config.CACHE_TIME_LIFE,
+            settings.cache_time_life,
         )
 
 
@@ -322,7 +322,7 @@ class MultipleFilmsService:
         await self.redis.set(
             cache_key,
             FILM_ADAPTER.dump_json(films),
-            config.CACHE_TIME_LIFE,
+            settings.cache_time_life,
         )
 
 

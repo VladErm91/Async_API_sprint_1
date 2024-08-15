@@ -1,23 +1,31 @@
 import os
 from logging import config as logging_config
 
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 from core.logger import LOGGING
+
+# Корень проекта
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    project_name: str = "movies"
+
+    # Настройки Redis
+    redis_host: str = Field("127.0.0.1", alias="REDIS_HOST")
+    redis_port: int = Field(6379, alias="REDIS_PORT")
+
+    # Настройки Elastic
+    elastic_host: str = Field("127.0.0.1", alias="ELASTIC_HOST")
+    elastic_port: int = Field(9200, alias="ELASTIC_PORT")
+    elastic_schema: str = "http://"
+    cache_time_life: int = 60 * 60
+
 
 # Применяем настройки логирования
 logging_config.dictConfig(LOGGING)
 
-# Название проекта. Используется в Swagger-документации
-PROJECT_NAME = os.getenv("PROJECT_NAME", "movies")
-
-# Настройки Redis
-REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
-
-# Настройки Elasticsearch
-ELASTIC_HOST = os.getenv("ELASTIC_HOST", "127.0.0.1")
-ELASTIC_PORT = int(os.getenv("ELASTIC_PORT", 9200))
-ELASTIC_SCHEMA = "http://"
-# Корень проекта
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-CACHE_TIME_LIFE = 60 * 60
+settings = Settings()
