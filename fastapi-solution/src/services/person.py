@@ -8,8 +8,13 @@ from redis.asyncio import Redis
 
 from db.elastic import get_elastic
 from db.redis import generate_cache_key, get_redis
-from models.person import (FilmRating, PersonFilm, PersonRoleInFilms,
-                           PersonWithFilms, PortfolioFilm)
+from models.person import (
+    FilmRating,
+    PersonFilm,
+    PersonRoleInFilms,
+    PersonWithFilms,
+    PortfolioFilm,
+)
 
 PERSONFILM_ADAPTER = TypeAdapter(PersonFilm)
 LISTPERSONFILM_ADAPTER = TypeAdapter(list[PersonFilm])

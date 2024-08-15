@@ -9,7 +9,7 @@ from services.genre import GenreService, get_genre_service
 router = APIRouter()
 
 
-@router.get("/{genre_id}", response_model=Genre)
+@router.get("/{genre_id}", response_model=Genre, summary="Запрос жанра по id")
 async def genre_details(
     genre_id: str, genre_service: GenreService = Depends(get_genre_service)
 ) -> Genre:
@@ -19,7 +19,9 @@ async def genre_details(
     return genre
 
 
-@router.get("", response_model=GenrePaginationResponse)
+@router.get(
+    "", response_model=GenrePaginationResponse, summary="Поиск жанра по наименованию"
+)
 async def search_genres(
     query: str = Query("", description="Get Genre by genre name"),
     sort: Optional[str] = None,

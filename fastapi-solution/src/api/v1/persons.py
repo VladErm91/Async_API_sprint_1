@@ -9,7 +9,9 @@ from services.person import PersonService, get_person_service
 router = APIRouter()
 
 
-@router.get("/search", response_model=list[PersonFilm])
+@router.get(
+    "/search", response_model=list[PersonFilm], summary="Поиск персоны по имени"
+)
 async def persons_search(
     query: str = Query("", description="Get Persons by names"),
     page_size: int = Query(
@@ -29,8 +31,7 @@ async def persons_search(
 
 
 @router.get(
-    "/{person_id}",
-    response_model=PersonFilm | None,
+    "/{person_id}", response_model=PersonFilm | None, summary="Запрос персоны по id"
 )
 async def person_details(
     person_id: str, person_service: PersonService = Depends(get_person_service)
@@ -41,7 +42,11 @@ async def person_details(
     return person
 
 
-@router.get("/{person_id}/film/", response_model=list[FilmRating])
+@router.get(
+    "/{person_id}/film/",
+    response_model=list[FilmRating],
+    summary="Запрос фильмов в котором принимала участие персона по id",
+)
 async def person_films(
     person_id: str, person_service: PersonService = Depends(get_person_service)
 ) -> list[FilmRating]:

@@ -4,8 +4,12 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from models.film import Film, FilmDetailed
-from services.film import (FilmService, MultipleFilmsService, get_film_service,
-                           get_multiple_films_service)
+from services.film import (
+    FilmService,
+    MultipleFilmsService,
+    get_film_service,
+    get_multiple_films_service,
+)
 
 # Объект router, в котором регистрируем обработчики
 router = APIRouter()
