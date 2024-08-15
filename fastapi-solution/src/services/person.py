@@ -44,7 +44,6 @@ class PersonService:
         films = await self._get_uuid_roles_in_films(person_id=person_id)
         return PersonFilm(uuid=person_id, full_name=person_name, films=films)
 
-
     async def _get_uuid_roles_in_films(self, person_id: str) -> list[PersonRoleInFilms]:
         films_doc = await self.elastic.search(
             index="movies",

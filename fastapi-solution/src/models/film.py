@@ -1,13 +1,10 @@
 from typing import List, Optional
 
 from pydantic import BaseModel
+
 from models.genre import Genre
+from models.person import Person
 
-
-class Person(BaseModel):
-    """Модель данных персоны, участвующей в создании фильма."""
-    uuid: str
-    full_name: str
 
 
 class Film(BaseModel):

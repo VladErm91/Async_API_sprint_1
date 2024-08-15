@@ -92,7 +92,6 @@ index_body_genres = {
         "properties": {
             "uuid": {
                 "type": "keyword",
-                "dynamic": "strict",
             },
             "name": {
                 "type": "text",
@@ -113,7 +112,6 @@ index_body_persons = {
         "properties": {
             "uuid": {
                 "type": "keyword",
-                "dynamic": "strict",
             },
             "full_name": {
                 "type": "text",
